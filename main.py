@@ -1,3 +1,6 @@
+from typing import List
+
+
 class Produto:
     def __init__(self, produto_id, nome, ingredientes, preco, estoque):
         self.produto_id = produto_id
@@ -5,6 +8,15 @@ class Produto:
         self.ingredientes = ingredientes
         self.preco = preco
         self.estoque = estoque
+
+    def __str__(self):
+        return f"{self.nome} - R${self.preco:.2f}"
+
+    def exibir_detalhes(self):
+        """Exibe todos os detalhes do produto"""
+        print(f"\nID: {self.produto_id} | {self.nome} - R${self.preco:.2f}")
+        print(f"   Ingredientes: {self.ingredientes}")
+        print(f"   Estoque: {self.estoque} unidades")
 
 
 class Cliente:
@@ -14,6 +26,22 @@ class Cliente:
         self.email = email
         self.telefone = telefone
         self.pontos = 0
+
+    def exibir_detalhes(self):
+        """Exibe todos os detalhes do cliente"""
+        print(f"\nCliente: {self.nome} (ID: {self.cliente_id})")
+        print(f"   Email: {self.email} | Telefone: {self.telefone}")
+        print(f"   Pontos acumulados: {self.pontos}")
+        if self.historico_pedidos:
+            print(f"   Total de pedidos: {len(self.historico_pedidos)}")
+        else:
+            print("   Nenhum pedido realizado")
+
+    def adicionar_pontos(self, valor: int):
+        """Adiciona pontos ao cliente baseado no valor da compra"""
+        pontos_ganhos = int(valor)
+        self.pontos += pontos_ganhos
+        return pontos_ganhos
 
 
 class Pedido:
@@ -26,19 +54,23 @@ class Pedido:
 
 class SistemaCafeteria:
     def __init__(self):
-        self.produtos = []
-        self.clientes = []
-        self.pedidos = []
+        self.produtos: List[Produto] = []
+        self.clientes: List[Cliente] = []
+        self.pedidos: List[Pedido] = []
         self.id_pedido = 1
         self.id_cliente = 1
         self.inicializar_dados()
 
     def inicializar_dados(self):
         # Produtos iniciais
-        self.produtos.append(Produto(1, "Café Expresso", "Café puro", 5.0, 10))
+        self.produtos.append(Produto(1, "Café Expresso", "Café", 5.0, 10))
+        self.id_pedido += 1
         self.produtos.append(Produto(2, "Cappuccino", "Café, leite, chocolate", 7.5, 15))
+        self.id_pedido += 1
+
         # Cliente inicial
         self.clientes.append(Cliente(1, "Maria Souza", "maria@email.com", "11999999999"))
+        self.id_cliente += 1
 
     def menu_principal(self):
         while True:
@@ -67,20 +99,44 @@ class SistemaCafeteria:
                 print("Opção inválida.")
 
     def registrar_cliente(self):
-        nome = input("Nome: ")
+        """Registra um novo cliente no sistema"""
+        print("\n" + "=" * 50)
+        print("            REGISTRAR NOVO CLIENTE            ")
+        print("=" * 50)
+
+        nome = input("\nNome completo: ")
+        while not nome:
+            print("Nome não pode ser vazio.")
+            nome = input("Nome completo: ")
+
         email = input("Email: ")
+        while not email or "@" not in email:
+            print("Email inválido.")
+            email = input("Email: ")
+
         telefone = input("Telefone: ")
+        while not telefone:
+            print("Telefone não pode ser vazio.")
+            telefone = input("Telefone: ")
+
+        # Verificar se email já está cadastrado
+        for cliente in self.clientes:
+            if cliente.email == email:
+                print("\nJá existe um cliente cadastrado com este email!")
+                input("Pressione ENTER para continuar...")
+                return
+
         novo_cliente = Cliente(self.id_cliente, nome, email, telefone)
         self.clientes.append(novo_cliente)
-        print(f"Cliente registrado! ID: {self.id_cliente}")
         self.id_cliente += 1
+        print("Cliente Registrado!\n")
+        novo_cliente.exibir_detalhes()
 
     def mostrar_cardapio(self):
+        """Exibe o cardápio completo"""
         print("\n--- Cardápio ---")
         for produto in self.produtos:
-            print(f"ID: {produto.produto_id} | {produto.nome} - R${produto.preco:.2f}")
-            print(f"   Ingredientes: {produto.ingredientes}")
-            print(f"   Estoque: {produto.estoque}")
+            produto.exibir_detalhes()
 
     def fazer_pedido(self):
         try:
@@ -123,7 +179,7 @@ class SistemaCafeteria:
 
         novo_pedido = Pedido(self.id_pedido, cliente_id, itens, total)
         self.pedidos.append(novo_pedido)
-        cliente.pontos += int(total)
+        cliente.adicionar_pontos(total)
         print(f"Pedido {self.id_pedido} finalizado. Total: R${total:.2f}")
         self.id_pedido += 1
 
