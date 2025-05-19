@@ -32,10 +32,6 @@ class Cliente:
         print(f"\nCliente: {self.nome} (ID: {self.cliente_id})")
         print(f"   Email: {self.email} | Telefone: {self.telefone}")
         print(f"   Pontos acumulados: {self.pontos}")
-        if self.historico_pedidos:
-            print(f"   Total de pedidos: {len(self.historico_pedidos)}")
-        else:
-            print("   Nenhum pedido realizado")
 
     def adicionar_pontos(self, valor: int):
         """Adiciona pontos ao cliente baseado no valor da compra"""
